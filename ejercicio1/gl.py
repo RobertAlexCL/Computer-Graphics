@@ -1,20 +1,15 @@
 import struct
 
 def char(c):
-    # 1 byte
     return struct.pack('=c', c.encode('ascii'))
 
 def word(w):
-    #2 bytes
     return struct.pack('=h', w)
 
 def dword(d):
-    # 4 bytes
     return struct.pack('=l', d)
 
 def color(r, g, b):
-    # Acepta valores de 0 a 1
-    # Se asegura que la información de color se guarda solamente en 3 bytes
     return bytes([ int(b * 255), int(g* 255), int(r* 255)])
 
 
@@ -23,7 +18,7 @@ WHITE = color(1,1,1)
 
 
 class Renderer(object):
-    def glinit(self, width, height):
+    def __init__(self, width, height):
         self.curr_color = WHITE
         self.clear_color = BLACK
         self.glCreateWindow(width, height)
@@ -40,19 +35,17 @@ class Renderer(object):
         self.vpWidth = width
         self.vpHeight = height
 
+    def glClear(self):
+        self.pixels = [[ self.clear_color for y in range(self.height)] for x in range(self.width)]
 
     def glClearColor(self, r, g, b):
         self.clear_color = color(r, g, b)
 
-    def glClear(self):
-        self.pixels = [[ self.clear_color for y in range(self.height)] for x in range(self.width)]
+    def glVertex(self, x, y):
+            self.pixels[int(x)][int(y)] = self.curr_color
 
     def glColor(self, r, g, b):
         self.curr_color = color(r,g,b)
-
-
-    def glVertex(self, x, y):
-            self.pixels[int(x)][int(y)] = self.curr_color
 
 
     def glFinish(self, filename):

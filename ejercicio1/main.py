@@ -6,7 +6,7 @@ height = 540
 
 rend = Renderer(width, height)
 
-rend.glClearColor(0,0,0)
+rend.glClearColor(0.5,0.5,1)
 
 rend.glClear()
 
