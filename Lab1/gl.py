@@ -273,4 +273,145 @@ class Render(object):
                     #There must be an error on the files point
                     pass
                 
-     
+  #Function to draw any polygon
+    def glDrawPolygon(self,vertexList,color=None):
+        color=self.currentColor if color == None else color
+        #We save and max and min in y to paint them
+        xMin=None
+        xMax=None
+        yMin=None
+        yMax=None
+        for i in range(len(vertexList)):
+            
+            vertex=vertexList[i]
+            vertex1=vertexList[(i+1)%len(vertexList)]
+            #Now we can draw lines from vertex to vertex
+            try:
+                
+                x0=round(vertex[0])
+                y0=round(vertex[1])
+                
+                x1=round(vertex1[0])
+                y1=round(vertex1[1])
+                self.glLineAbsolute(x0,y0,x1,y1,color)
+            except:
+                #There must be an error on the vertexList
+                pass
+
+    #Function to draw and paint any polygon
+    def glDrawAndPaintPolygon(self,vertexList,color=None):
+        color=self.currentColor if color == None else color
+        #We save and max and min in y to paint them
+        xMin=vertexList[0][0]
+        xMax=vertexList[0][0]
+        yMin=vertexList[0][1]
+        yMax=vertexList[0][1]
+        for i in range(len(vertexList)):
+           
+            vertex=vertexList[i]
+            vertex1=vertexList[(i+1)%len(vertexList)]
+            xMin = xMin if(xMin<=vertex[0]) else vertex[0]
+            xMax = xMax if(xMax>=vertex[0]) else vertex[0]
+            yMin = yMin if(yMin<=vertex[1]) else vertex[1]
+            yMax = yMax if(yMax>=vertex[1]) else vertex[1]
+            #Now we can draw lines from vertex to vertex
+            try:
+                
+                x0=round(vertex[0])
+                y0=round(vertex[1])
+                
+                x1=round(vertex1[0])
+                y1=round(vertex1[1])
+                self.glLineAbsolute(x0,y0,x1,y1,color)
+            except:
+                #There must be an error on the vertexList
+                pass
+        for y in range(yMin,yMax):
+                count=0;  
+                for x in range(xMin,xMax):
+                    try:
+                        if(self.pixels[y][x]==color):
+                            count=count+1   
+                        if(count%2==1):
+                            vertexOnly=True
+                            for x2 in range(x,xMax+1):
+                                if(self.pixels[y][x2]==color):
+                                    vertexOnly=False
+                            if(not vertexOnly):                           
+                                self.glVertexColorAbsolute(x,y,color)
+                    except:
+                        #Error coordinates
+                        pass
+        #Points in y that were not collored
+        for x in range(xMin,xMax): 
+            for y in range(yMin,yMax):
+                if(self.pixels[y-1][x]==color and self.pixels[y+1][x]==color):
+                    self.glVertexColorAbsolute(x,y,color)
+                # elif(self.pixels[y-1][x]==self.currentColor and self.pixels[y][x+1]==self.currentColor):
+                #     self.glVertexColorAbsolute(x,y)
+                # elif(self.pixels[y+1][x]==self.currentColor and self.pixels[y][x-1]==self.currentColor):
+                #     self.glVertexColorAbsolute(x,y)
+                # elif(self.pixels[y][x-1]==self.currentColor and self.pixels[y][x+1]==self.currentColor):
+                #     self.glVertexColorAbsolute(x,y)
+
+
+    #Function to draw and paint any polygon 
+    def glDrawAndPaintPolygonOddEven(self,vertexList,color=None):
+        color=self.currentColor if color == None else color
+        #We save and max and min in y to paint them
+        xMin=vertexList[0][0]
+        xMax=vertexList[0][0]
+        yMin=vertexList[0][1]
+        yMax=vertexList[0][1]
+        for i in range(len(vertexList)):
+           
+            vertex=vertexList[i]
+            vertex1=vertexList[(i+1)%len(vertexList)]
+            xMin = xMin if(xMin<=vertex[0]) else vertex[0]
+            xMax = xMax if(xMax>=vertex[0]) else vertex[0]
+            yMin = yMin if(yMin<=vertex[1]) else vertex[1]
+            yMax = yMax if(yMax>=vertex[1]) else vertex[1]
+            #Now we can draw lines from vertex to vertex
+            try:
+                
+                x0=round(vertex[0])
+                y0=round(vertex[1])
+                
+                x1=round(vertex1[0])
+                y1=round(vertex1[1])
+                self.glLineAbsolute(x0,y0,x1,y1,color)
+            except:
+                #There must be an error on the vertexList
+                pass
+        for y in range(yMin,yMax):  
+            for x in range(xMin,xMax):
+                if(self.isPointInPolygon(x,y,vertexList)):
+                    self.glVertexColorAbsolute(x,y,color)
+
+    #Function to check oddEven
+    #Determine if point is in path
+    #https://handwiki.org/wiki/Even%E2%80%93odd_rule
+    #This code was extracted from the link before and it works perfectly
+    def isPointInPolygon(self,x, y, vertexList):
+        vertexCount = len(vertexList)
+        i = 0
+        j = vertexCount - 1
+        inPolygon = False
+        for i in range(vertexCount):
+            if ((vertexList[i][1] > y) != (vertexList[j][1] > y)) and \
+                    (x < vertexList[i][0] + (vertexList[j][0] - vertexList[i][0]) * (y - vertexList[i][1]) /
+                                    (vertexList[j][1] - vertexList[i][1])):
+                inPolygon = not inPolygon
+            j = i
+        return inPolygon    
+        
+    #Function to draw and paint any polygon from triangles
+    def glDrawAndPaintPolygonFromTriangles(self,vertexList):
+        #We count the vertex to know how to unite them
+        vertexCount=(len(vertexList))
+        self.glDrawAndPaintPolygon(vertexList)
+        for i in range(vertexCount):
+           self.glDrawAndPaintPolygon([vertexList[0],vertexList[1],vertexList[i]])
+           self.glDrawAndPaintPolygon([vertexList[0],vertexList[vertexCount-1],vertexList[i]])           
+            
+                
